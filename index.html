@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محول الصور إلى ASCII Art</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS الأساسي */
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #ff6b6b;
+            --dark-color: #333;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+            --success-color: #28a745;
+            --font-arabic: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-arabic);
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7fa;
+            direction: rtl;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* رأس الموقع */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* الأزرار */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-arabic);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-convert {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1.1rem;
+            padding: 15px 30px;
+            margin-top: 20px;
+        }
+
+        .btn-convert:hover {
+            background-color: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-copy, .btn-download {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-copy:hover, .btn-download:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        /* قسم رفع الصور */
+        .upload-section {
+            margin: 2rem 0;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--primary-color);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--secondary-color);
+            background-color: #f0f7ff;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .file-types {
+            margin-top: 1rem;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        /* قسم الإعدادات */
+        .settings-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .settings-section h2 {
+            margin-bottom: 1.5rem;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 10px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .setting-item label {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .setting-item input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--light-color);
+            outline: none;
+        }
+
+        .setting-item select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: var(--font-arabic);
+            background-color: white;
+        }
+
+        /* قسم النتائج */
+        .results-section {
+            margin: 2rem 0;
+        }
+
+        .results-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            background-color: white;
+            border-radius: 0 12px 12px 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .result-display {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            max-height: 500px;
+        }
+
+        .result-display pre {
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.2;
+            white-space: pre;
+            margin: 0;
+        }
+
+        .colorful-result pre {
+            font-weight: bold;
+        }
+
+        /* قسم المعاينة */
+        .preview-section {
+            margin: 2rem 0;
+        }
+
+        .preview-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-placeholder {
+            color: var(--gray-color);
+        }
+
+        .preview-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+
+        /* التذييل */
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            color: var(--light-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* النافذة المنبثقة */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            left: 20px;
+            top: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+
+        .language-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 1.5rem;
+        }
+
+        .lang-option {
+            padding: 15px 10px;
+            background-color: var(--light-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-arabic);
+            font-weight: 600;
+        }
+
+        .lang-option:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* إشعارات */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { top: -100px; opacity: 0; }
+            to { top: 20px; opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { top: 20px; opacity: 1; }
+            to { top: -100px; opacity: 0; }
+        }
+
+        /* التجاوب للهواتف المحمولة */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .result-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+            }
+            
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .header {
+                padding: 1.5rem 0;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tab-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .result-display {
+                padding: 1rem;
+            }
+            
+            .result-display pre {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- رأس الموقع -->
+    <header class="header">
+        <div class="container">
+            <h1><i class="fas fa-image"></i> محول الصور إلى ASCII Art</h1>
+            <p class="subtitle">حول أي صورة إلى فن نصي مذهل</p>
+        </div>
+    </header>
+
+    <!-- القسم الرئيسي -->
+    <main class="main-content">
+        <div class="container">
+            <!-- منطقة رفع الصور -->
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3>اسحب وأفلت الصورة هنا</h3>
+                    <p>أو انقر لاختيار ملف</p>
+                    <input type="file" id="imageInput" accept="image/*" hidden>
+                    <button class="btn btn-primary" id="selectFileBtn">
+                        <i class="fas fa-folder-open"></i> اختيار صورة
+                    </button>
+                    <p class="file-types">يدعم: JPG, PNG, GIF, BMP (حتى 5MB)</p>
+                </div>
+            </section>
+
+            <!-- إعدادات التحويل -->
+            <section class="settings-section">
+                <h2><i class="fas fa-sliders-h"></i> إعدادات التحويل</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="width">العرض (حرف):</label>
+                        <input type="range" id="width" min="20" max="200" value="100">
+                        <span id="widthValue">100</span>
+                    </div>
+                    <div class="setting-item">
+                        <label for="charset">مجموعة الرموز:</label>
+                        <select id="charset">
+                            <option value="simple">بسيطة (@#%*+=:-.)</option>
+                            <option value="detailed">مفصلة (@%#*+=-:. )</option>
+                            <option value="blocks">كتل (█▓▒░ )</option>
+                            <option value="custom">مخصصة...</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="colorMode">وضع الألوان:</label>
+                        <select id="colorMode">
+                            <option value="monochrome">أبيض وأسود</option>
+                            <option value="colorful">ملون</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="invert">عكس الألوان:</label>
+                        <input type="checkbox" id="invert">
+                    </div>
+                </div>
+                <button class="btn btn-convert" id="convertBtn">
+                    <i class="fas fa-sync-alt"></i> تحويل الصورة
+                </button>
+            </section>
+
+            <!-- النتائج -->
+            <section class="results-section">
+                <h2><i class="fas fa-palette"></i> النتائج</h2>
+                <div class="results-tabs">
+                    <button class="tab-btn active" data-tab="monochrome">
+                        <i class="fas fa-moon"></i> النتيجة بالأبيض والأسود
+                    </button>
+                    <button class="tab-btn" data-tab="colorful">
+                        <i class="fas fa-paint-brush"></i> النتيجة الملونة
+                    </button>
+                </div>
+
+                <!-- نتيجة الأبيض والأسود -->
+                <div class="tab-content active" id="monochrome">
+                    <div class="result-container">
+                        <div class="result-header">
+                            <h3>النتيجة بالأبيض والأسود</h3>
+                            <div class="result-actions">
+                                <button class="btn btn-copy" id="copyMonochrome">
+                                    <i class="far fa-copy"></i> نسخ النص
+                                </button>
+                                <button class="btn btn-download" id="downloadMonochrome">
+                                    <i class="fas fa-download"></i> حفظ كملف TXT
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-display">
+                            <pre id="monochromeResult"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- نتيجة الألوان -->
+                <div class="tab-content" id="colorful">
+                    <div class="result-container">
+                        <div class="result-header">
+                            <h3>النتيجة الملونة</h3>
+                            <div class="result-actions">
+                                <button class="btn btn-copy" id="copyColorful">
+                                    <i class="far fa-copy"></i> نسخ النص
+                                </button>
+                                <div class="language-dropdown">
+                                    <select id="languageSelect">
+                                        <option value="plain">نص عادي</option>
+                                        <option value="python">Python</option>
+                                        <option value="javascript">JavaScript</option>
+                                        <option value="html">HTML</option>
+                                        <option value="java">Java</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-display colorful-result">
+                            <pre id="colorfulResult"></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- معاينة الصورة -->
+            <section class="preview-section">
+                <h2><i class="fas fa-eye"></i> معاينة الصورة الأصلية</h2>
+                <div class="preview-container">
+                    <img id="imagePreview" src="" alt="معاينة الصورة">
+                    <div class="preview-placeholder" id="previewPlaceholder">
+                        <i class="fas fa-image"></i>
+                        <p>سيتم عرض الصورة هنا بعد اختيارها</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- تذييل الصفحة -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>عن الموقع</h4>
+                    <p>أداة مجانية لتحويل الصور إلى فن ASCII مذهل. يمكنك استخدام النتائج في مشاريعك البرمجية أو مشاركتها كفن رقمي.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>شارك الموقع</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>الدعم</h4>
+                    <p>للدعم الفني أو لاقتراحات التحسين، راسلنا عبر:</p>
+                    <p><i class="fas fa-envelope"></i> support@ascii-art.com</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>© 2023 محول الصور إلى ASCII Art. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- نافذة اختيار اللغة للنسخ -->
+    <div class="modal" id="languageModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3><i class="fas fa-code"></i> اختر اللغة البرمجية</h3>
+            <div class="language-options">
+                <button class="lang-option" data-lang="python">
+                    <i class="fab fa-python"></i> Python
+                </button>
+                <button class="lang-option" data-lang="javascript">
+                    <i class="fab fa-js"></i> JavaScript
+                </button>
+                <button class="lang-option" data-lang="html">
+                    <i class="fab fa-html5"></i> HTML
+                </button>
+                <button class="lang-option" data-lang="java">
+                    <i class="fab fa-java"></i> Java
+                </button>
+                <button class="lang-option" data-lang="plain">
+                    <i class="fas fa-font"></i> نص عادي
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // كود JavaScript الكامل
+        document.addEventListener('DOMContentLoaded', function() {
+            // عناصر DOM
+            const imageInput = document.getElementById('imageInput');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            const uploadArea = document.getElementById('uploadArea');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewPlaceholder = document.getElementById('previewPlaceholder');
+            const convertBtn = document.getElementById('convertBtn');
+            const widthSlider = document.getElementById('width');
+            const widthValue = document.getElementById('widthValue');
+            const charsetSelect = document.getElementById('charset');
+            const colorModeSelect = document.getElementById('colorMode');
+            const invertCheckbox = document.getElementById('invert');
+            const monochromeResult = document.getElementById('monochromeResult');
+            const colorfulResult = document.getElementById('colorfulResult');
+            const copyMonochromeBtn = document.getElementById('copyMonochrome');
+            const downloadMonochromeBtn = document.getElementById('downloadMonochrome');
+            const copyColorfulBtn = document.getElementById('copyColorful');
+            const languageSelect = document.getElementById('languageSelect');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const languageModal = document.getElementById('languageModal');
+            const closeModal = document.querySelector('.close-modal');
+            const langOptions = document.querySelectorAll('.lang-option');
+            
+            let currentImage = null;
+            let asciiArtMonochrome = '';
+            let asciiArtColorful = '';
+
+            // =============== وظائف محول ASCII ===============
+            
+            // الحصول على مجموعة الرموز
+            function getCharset(type) {
+                const charsets = {
+                    simple: '@#%*+=:-. ',
+                    detailed: '@%#*+=-:. ',
+                    blocks: '█▓▒░ ',
+                    custom: '@#$%&?*+;:,. '
+                };
+                
+                return charsets[type] || charsets.simple;
+            }
+            
+            // تحويل RGB إلى HEX
+            function rgbToHex(r, g, b) {
+                return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+            }
+            
+            // تحويل الصورة إلى ASCII أبيض وأسود
+            function convertToAsciiMonochrome(image, width, charset, invert) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // حساب الأبعاد مع الحفاظ على نسبة العرض إلى الارتفاع
+                const aspectRatio = image.height / image.width;
+                const height = Math.floor(width * aspectRatio * 0.5); // 0.5 لأن الأحرف أطول من عرضها
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // رسم الصورة على Canvas
+                ctx.drawImage(image, 0, 0, width, height);
+                
+                // الحصول على بيانات البكسل
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+                
+                let asciiArt = '';
+                
+                // تحويل كل بكسل إلى حرف ASCII
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const index = (y * width + x) * 4;
+                        const r = data[index];
+                        const g = data[index + 1];
+                        const b = data[index + 2];
+                        
+                        // تحويل RGB إلى تدرج رمادي
+                        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                        
+                        // عكس الألوان إذا طلب المستخدم ذلك
+                        let brightness = invert ? 255 - gray : gray;
+                        
+                        // تحويل التدرج الرمادي إلى فهرس الحرف
+                        const charIndex = Math.floor((brightness / 255) * (charset.length - 1));
+                        const char = charset.charAt(charIndex);
+                        
+                        asciiArt += char;
+                    }
+                    asciiArt += '\n';
+                }
+                
+                return asciiArt;
+            }
+            
+            // تحويل الصورة إلى ASCII ملون
+            function convertToAsciiColorful(image, width, charset, invert) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // حساب الأبعاد مع الحفاظ على نسبة العرض إلى الارتفاع
+                const aspectRatio = image.height / image.width;
+                const height = Math.floor(width * aspectRatio * 0.5);
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // رسم الصورة على Canvas
+                ctx.drawImage(image, 0, 0, width, height);
+                
+                // الحصول على بيانات البكسل
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+                
+                let asciiArt = '';
+                
+                // تحويل كل بكسل إلى حرف ASCII مع الألوان
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const index = (y * width + x) * 4;
+                        const r = data[index];
+                        const g = data[index + 1];
+                        const b = data[index + 2];
+                        
+                        // تحويل RGB إلى تدرج رمادي
+                        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                        
+                        // عكس الألوان إذا طلب المستخدم ذلك
+                        let brightness = invert ? 255 - gray : gray;
+                        
+                        // تحويل التدرج الرمادي إلى فهرس الحرف
+                        const charIndex = Math.floor((brightness / 255) * (charset.length - 1));
+                        const char = charset.charAt(charIndex);
+                        
+                        // الحصول على اللون بصيغة HEX
+                        const hexColor = rgbToHex(r, g, b);
+                        
+                        // إضافة الحرف مع لونه
+                        asciiArt += `<span style="color: ${hexColor}">${char}</span>`;
+                    }
+                    asciiArt += '<br>';
+                }
+                
+                return asciiArt;
+            }
+            
+            // تنسيق ASCII للغات البرمجية المختلفة
+            function formatAsciiForLanguage(asciiText, language) {
+                // إزالة الوسم HTML للحصول على النص الخام
+                const rawText = asciiText.replace(/<[^>]*>/g, '').replace(/<br>/g, '\n');
+                
+                switch(language) {
+                    case 'python':
+                        return `# ASCII Art\nascii_art = """\n${rawText}\n"""`;
+                    case 'javascript':
+                        return `// ASCII Art\nconst asciiArt = \`\n${rawText}\n\`;`;
+                    case 'html':
+                        return `<!-- ASCII Art -->\n<pre>\n${rawText}\n</pre>`;
+                    case 'java':
+                        return `// ASCII Art\nString asciiArt = "\n${rawText.replace(/\n/g, '\\n')}\n";`;
+                    default:
+                        return rawText;
+                }
+            }
+            
+            // =============== أحداث المستخدم ===============
+            
+            // أحداث رفع الصور
+            selectFileBtn.addEventListener('click', () => imageInput.click());
+            
+            uploadArea.addEventListener('click', () => imageInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#4a6fa5';
+                uploadArea.style.backgroundColor = '#f0f7ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#4a6fa5';
+                uploadArea.style.backgroundColor = 'white';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#4a6fa5';
+                uploadArea.style.backgroundColor = 'white';
+                
+                if (e.dataTransfer.files.length) {
+                    const file = e.dataTransfer.files[0];
+                    if (file.type.startsWith('image/')) {
+                        handleImageFile(file);
+                    } else {
+                        alert('الرجاء اختيار ملف صورة فقط');
+                    }
+                }
+            });
+            
+            imageInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleImageFile(e.target.files[0]);
+                }
+            });
+            
+            // عرض الصورة المختارة
+            function handleImageFile(file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('حجم الصورة كبير جدًا. الرجاء اختيار صورة أقل من 5MB');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImage = new Image();
+                    currentImage.onload = function() {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        previewPlaceholder.style.display = 'none';
+                        
+                        // تحويل الصورة تلقائيًا
+                        setTimeout(convertImageToAscii, 500);
+                    };
+                    currentImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // تحديث عرض قيمة السلايدر
+            widthSlider.addEventListener('input', () => {
+                widthValue.textContent = widthSlider.value;
+            });
+            
+            // تحويل الصورة إلى ASCII
+            convertBtn.addEventListener('click', convertImageToAscii);
+            
+            function convertImageToAscii() {
+                if (!currentImage) {
+                    alert('الرجاء اختيار صورة أولاً');
+                    return;
+                }
+                
+                const width = parseInt(widthSlider.value);
+                const charset = getCharset(charsetSelect.value);
+                const isColorful = colorModeSelect.value === 'colorful';
+                const invert = invertCheckbox.checked;
+                
+                // تحويل الصورة إلى ASCII أبيض وأسود
+                asciiArtMonochrome = convertToAsciiMonochrome(
+                    currentImage, 
+                    width, 
+                    charset, 
+                    invert
+                );
+                
+                monochromeResult.textContent = asciiArtMonochrome;
+                
+                // تحويل الصورة إلى ASCII ملون
+                if (isColorful) {
+                    asciiArtColorful = convertToAsciiColorful(
+                        currentImage, 
+                        width, 
+                        charset, 
+                        invert
+                    );
+                    colorfulResult.innerHTML = asciiArtColorful;
+                } else {
+                    // إذا كان الوضع أبيض وأسود، نعرض نفس النص لكن بدون ألوان
+                    colorfulResult.textContent = asciiArtMonochrome;
+                }
+                
+                // تفعيل التبويب الأول
+                tabBtns[0].click();
+            }
+            
+            // نسخ النص الأبيض والأسود
+            copyMonochromeBtn.addEventListener('click', () => {
+                if (!asciiArtMonochrome) {
+                    alert('لا يوجد نص لنسخه. الرجاء تحويل صورة أولاً');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(asciiArtMonochrome)
+                    .then(() => {
+                        showNotification('تم نسخ النص الأبيض والأسود إلى الحافظة');
+                    })
+                    .catch(err => {
+                        console.error('فشل النسخ: ', err);
+                        alert('فشل نسخ النص. الرجاء المحاولة مرة أخرى');
+                    });
+            });
+            
+            // تحميل ملف TXT
+            downloadMonochromeBtn.addEventListener('click', () => {
+                if (!asciiArtMonochrome) {
+                    alert('لا يوجد نص لتحميله. الرجاء تحويل صورة أولاً');
+                    return;
+                }
+                
+                const blob = new Blob([asciiArtMonochrome], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ascii-art.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification('تم تحميل ملف ASCII بنجاح');
+            });
+            
+            // نسخ النص الملون
+            copyColorfulBtn.addEventListener('click', () => {
+                if (!asciiArtColorful && colorModeSelect.value === 'colorful') {
+                    alert('لا يوجد نص ملون لنسخه. الرجاء تحويل صورة ملونة أولاً');
+                    return;
+                }
+                
+                const selectedLang = languageSelect.value;
+                let textToCopy = '';
+                
+                if (colorModeSelect.value === 'colorful') {
+                    textToCopy = formatAsciiForLanguage(asciiArtColorful, selectedLang);
+                } else {
+                    textToCopy = formatAsciiForLanguage(asciiArtMonochrome, selectedLang);
+                }
+                
+                navigator.clipboard.writeText(textToCopy)
+                    .then(() => {
+                        const langNames = {
+                            'plain': 'عادي',
+                            'python': 'Python',
+                            'javascript': 'JavaScript',
+                            'html': 'HTML',
+                            'java': 'Java'
+                        };
+                        showNotification(`تم نسخ النص ${langNames[selectedLang] ? 'بلغة ' + langNames[selectedLang] : ''} إلى الحافظة`);
+                    })
+                    .catch(err => {
+                        console.error('فشل النسخ: ', err);
+                        alert('فشل نسخ النص. الرجاء المحاولة مرة أخرى');
+                    });
+            });
+            
+            // التبديل بين التبويبات
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    
+                    // إزالة النشاط من جميع الأزرار
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    // إضافة النشاط للزر الحالي
+                    btn.classList.add('active');
+                    
+                    // إخفاء جميع المحتويات
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // إظهار المحتوى المطلوب
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // إغلاق النافذة المنبثقة
+            closeModal.addEventListener('click', () => {
+                languageModal.style.display = 'none';
+            });
+            
+            // اختيار لغة من النافذة المنبثقة
+            langOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const lang = option.getAttribute('data-lang');
+                    languageSelect.value = lang;
+                    languageModal.style.display = 'none';
+                    showNotification(`تم اختيار ${lang} بنجاح`);
+                });
+            });
+            
+            // إغلاق النافذة المنبثقة عند النقر خارجها
+            window.addEventListener('click', (e) => {
+                if (e.target === languageModal) {
+                    languageModal.style.display = 'none';
+                }
+            });
+            
+            // إظهار نافذة اختيار اللغة
+            languageSelect.addEventListener('click', (e) => {
+                e.preventDefault();
+                languageModal.style.display = 'flex';
+            });
+            
+            // عرض الإشعارات
+            function showNotification(message) {
+                // إنشاء عنصر الإشعار
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // إزالة الإشعار بعد 3 ثواني
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+            
+            // مثال توضيحي عند تحميل الصفحة
+            window.addEventListener('load', function() {
+                // إنشاء صورة مثال توضيحية
+                const exampleImage = new Image();
+                exampleImage.onload = function() {
+                    currentImage = exampleImage;
+                    // تحويل الصورة تلقائيًا بعد تحميلها
+                    setTimeout(() => {
+                        convertImageToAscii();
+                        showNotification('مرحبًا! جرب تحويل صورتك الخاصة عن طريق سحبها إلى المنطقة المخصصة');
+                    }, 1000);
+                };
+                // صورة مثال توضيحية (شعار ASCII بسيط)
+                exampleImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzRhNmZhNSIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+QVNDSUk8L3RleHQ+CiAgPHRleHQgeD0iNTAlIiB5PSI2MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9IjAuM2VtIj5BcnQ8L3RleHQ+Cjwvc3ZnPg==';
+            });
+        });
+    </script>
+</body>
+</html>
